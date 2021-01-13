@@ -9,8 +9,8 @@
 There are multiple ways to generate MUD objects, depending on the level of abstraction:
 
 ```python
-from muddy.maker import make_mud
-from muddy.models import Direction, IPVersion, Protocol, MatchType
+from muddy.muddy.maker import make_mud
+from muddy.muddy.models import Direction, IPVersion, Protocol, MatchType
 
 mud = make_mud(1,'https://lighting.example.com/lightbulb2000', 48, True, 'The BMS Example Light Bulb', 
 'https://lighting.example.com/lightbulb2000/documentation', [Direction.TO_DEVICE,Direction.FROM_DEVICE],
@@ -20,8 +20,8 @@ mud = make_mud(1,'https://lighting.example.com/lightbulb2000', 48, True, 'The BM
 or
 
 ```python
-from muddy.maker import make_mud, make_support_info
-from muddy.models import Direction, IPVersion, Protocol, MatchType
+from muddy.muddy.maker import make_mud, make_support_info
+from muddy.muddy.models import Direction, IPVersion, Protocol, MatchType
 
 support_info = make_support_info(1,'https://lighting.example.com/lightbulb2000', 48, True,
  'The BMS Example Light Bulb', 'https://lighting.example.com/lightbulb2000/documentation')
@@ -33,8 +33,8 @@ mud = make_mud(support_info , [Direction.TO_DEVICE,Direction.FROM_DEVICE],
 or
 
 ```python
-from muddy.maker import make_mud, make_acl_names, make_policy, make_acls
-from muddy.models import Direction, IPVersion, Protocol, MatchType
+from muddy.muddy.maker import make_mud, make_acl_names, make_policy, make_acls
+from muddy.muddy.models import Direction, IPVersion, Protocol, MatchType
 import random
 
 mud_name = f'mud-{random.randint(10000, 99999)}'
@@ -53,8 +53,8 @@ mud = make_mud(policies, acl, 1,'https://lighting.example.com/lightbulb2000', 48
 or
 
 ```python
-from muddy.maker import make_mud, make_acl_names, make_policy, make_acls, make_support_info
-from muddy.models import Direction, IPVersion, Protocol, MatchType
+from muddy.muddy.maker import make_mud, make_acl_names, make_policy, make_acls, make_support_info
+from muddy.muddy.models import Direction, IPVersion, Protocol, MatchType
 import random
 
 support_info = make_support_info(1,'https://lighting.example.com/lightbulb2000', 48, True,
