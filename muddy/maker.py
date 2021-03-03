@@ -125,8 +125,9 @@ def make_acldns_match(domain: str, direction: Direction):
         dict: A dictionary representing the ACLDNS match.
 
     """
-    if not re.match(DOMAIN_NAME_REGEX, domain):
-        raise InputException(f"Not a domain name: {domain}")
+    # TODO: Readdress later
+    #if not re.match(DOMAIN_NAME_REGEX, domain):
+    #    raise InputException(f"Not a domain name: {domain}")
 
     acldns_match = {}
     key = "ietf-acldns:src-dnsname" if direction is Direction.TO_DEVICE else \
