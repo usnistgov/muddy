@@ -136,8 +136,8 @@ def make_acldns_match(domain: str, direction: Direction):
 
     """
     # TODO: Readdress later
-    #if not re.match(DOMAIN_NAME_REGEX, domain):
-    #    raise InputException(f"Not a domain name: {domain}")
+    if not re.match(DOMAIN_NAME_REGEX, domain):
+        raise InputException(f"Not a domain name: {domain}")
 
     acldns_match = {}
     key = "ietf-acldns:src-dnsname" if direction is Direction.TO_DEVICE else \
