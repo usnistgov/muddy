@@ -39,6 +39,8 @@ def get_policy_type_prefix_string(direction):
 
 
 def get_ace_name(match_type):
+    if match_type is MatchType.IS_LOCAL:
+        return 'loc'
     if match_type is MatchType.IS_CLOUD:
         return 'cl'
     if match_type is MatchType.IS_MYMFG:

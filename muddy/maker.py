@@ -112,6 +112,16 @@ def make_port_range(dir_init: Direction, source_port: int, destination_port: int
     return port_range
 
 
+def make_local_match():
+    """Function to genreate a local match
+
+    Returns:
+        dict: A dictionary representing the local-networks match.
+
+    """
+    return {'local-networks': []}
+
+
 def make_acldns_match(domain: str, direction: Direction):
     """Function to generate an ACL match for a domain.
 
@@ -206,7 +216,9 @@ def make_sub_ace(sub_ace_name, protocol_direction, target_url, protocol, match_t
     destination_port = None
     cloud_ipv4_entry = None
 
-    if match_type is MatchType.IS_CLOUD:
+    if match_type is MatchType.IS_LOCAL:
+        match['ietf-mud:mud'] = make_local_match()
+    elif match_type is MatchType.IS_CLOUD:
         cloud_ipv4_entry = make_acldns_match(target_url, protocol_direction)
     elif match_type is MatchType.IS_CONTROLLER:
         match['ietf-mud:mud'] = make_controller_match(target_url)
