@@ -20,3 +20,5 @@ HTTP_URL_REGEX = r'^http(s)?:\/\/\w+([\-\.]{1}\w+)*\.[a-zA-Z_]{2,5}((:[0-9]{1,5}
 #HTTP_URL_REGEX = r'/^(http|https):\\/\\/[a-zA-Z0-9_]+([\\-\\.]{1}[a-zA-Z_0-9]+)*\\.[_a-zA-Z]{2,5}((:[0-9]{1,
 # 5})?\\/.*)?$/i'
 URN_URL_REGEX = '^urn:[a-zA-Z0-9][a-zA-Z0-9-]{0,31}:[a-zA-Z0-9()+,\-.:=@;$_!*\'%/?#]+$^'
+# TODO: (4/4) Readdress the regex override (mostly for testing)
+REGEX_OVERRIDE = True

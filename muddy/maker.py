@@ -5,7 +5,7 @@ import json
 
 from overload import overload
 
-from .constants import DOMAIN_NAME_REGEX, HTTP_URL_REGEX, URN_URL_REGEX
+from .constants import DOMAIN_NAME_REGEX, HTTP_URL_REGEX, URN_URL_REGEX, REGEX_OVERRIDE
 from .exceptions import InputException
 from .models import MatchType, IPVersion, Protocol, Direction
 from .utils import (
@@ -135,8 +135,8 @@ def make_acldns_match(domain: str, direction: Direction):
         dict: A dictionary representing the ACLDNS match.
 
     """
-    # TODO: Readdress later
-    if not re.match(DOMAIN_NAME_REGEX, domain):
+    # TODO: (1/4) Readdress the regex override (mostly for testing)
+    if not re.match(DOMAIN_NAME_REGEX, domain) and not REGEX_OVERRIDE:
         raise InputException(f"Not a domain name: {domain}")
 
     acldns_match = {}
@@ -161,7 +161,8 @@ def make_controller_match(url: str):
         dict: A dictionary representing the controller match.
 
     """
-    if not (re.match(HTTP_URL_REGEX, url) or re.match(URN_URL_REGEX, url)):
+    # TODO: (2/4) Readdress the regex override (mostly for testing)
+    if not (re.match(HTTP_URL_REGEX, url) or re.match(URN_URL_REGEX, url)) and not REGEX_OVERRIDE:
         raise InputException('Not a valid URI: {}' % url)
 
     return {'controller': url}
@@ -188,7 +189,8 @@ def make_manufacturer_match(domain: str):
         dict: A dictionary representing the manufacturer match.
 
     """
-    if not re.match(DOMAIN_NAME_REGEX, domain):
+    # TODO: (3/4) Readdress the regex override (mostly for testing)
+    if not re.match(DOMAIN_NAME_REGEX, domain) and not REGEX_OVERRIDE:
         raise InputException("Not a domain name: {domain}")
 
     return {'manufacturer': domain}
