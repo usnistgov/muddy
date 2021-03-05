@@ -285,7 +285,7 @@ def make_acl(protocol_direction, ip_version, target_url, protocol, match_types,
         raise InputException('acl_name and mud_name can\'t both by None at the same time')
     elif acl_name is None:
         acl_name = make_acl_name(mud_name, ip_version, direction_initiated)
-    return {'name': acl_name, 'type': acl_type_prefix,
+    return {'name': acl_name, 'type': acl_type_prefix + "-acl-type",
             'aces': {
                 'ace': make_ace(protocol_direction, target_url, protocol, match_types, direction_initiated, ip_version,
                                 local_ports, remote_ports)}}
