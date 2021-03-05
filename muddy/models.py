@@ -42,3 +42,4 @@ class Direction(Enum):
     """
     TO_DEVICE = auto()
     FROM_DEVICE = auto()
+    EITHER = auto()

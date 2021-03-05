@@ -278,6 +278,28 @@ def make_ace(protocol_direction, target_url, protocol, match_types, direction_in
     return ace
 
 
+# TODO: Test this to ensure it works
+def append_sub_ace(ace, protocol_direction, target_url, protocol, match_type, direction_initiated,
+                   ip_version, local_port=None, remote_port=None):
+    # Determine what number instance this sub_ace will be
+    ace_name = get_ace_name(match_type)
+    iteration = 0
+    for i in ace:
+        if i["name"].startswith(ace_name):
+            iteration+=1
+    ace.append(
+        make_sub_ace(
+            get_sub_ace_name(get_ace_name(match_type), direction_initiated, iteration),
+            protocol_direction,
+            target_url,
+            protocol, match_type, direction_initiated, ip_version,
+            local_port,
+            remote_port
+        )
+    )
+    return ace
+
+
 def make_acl(protocol_direction, ip_version, target_url, protocol, match_types,
              direction_initiated, local_ports=None, remote_ports=None, acl_name=None, mud_name=None):
     acl_type_prefix = get_ipversion_string(ip_version)
@@ -285,10 +307,27 @@ def make_acl(protocol_direction, ip_version, target_url, protocol, match_types,
         raise InputException('acl_name and mud_name can\'t both by None at the same time')
     elif acl_name is None:
         acl_name = make_acl_name(mud_name, ip_version, direction_initiated)
-    return {'name': acl_name, 'type': acl_type_prefix + "-acl-type",
+    return {'name': acl_name, 'type': acl_type_prefix + '-acl-type',
             'aces': {
                 'ace': make_ace(protocol_direction, target_url, protocol, match_types, direction_initiated, ip_version,
                                 local_ports, remote_ports)}}
+
+
+# TODO: Finish building this
+def update_acl(acls, ip_version, target_url, protocol, match_types, direction_initiated, local_ports=None,
+               remote_ports=None, acl_names=None, mud_name=None):
+    if acl_names is None and mud_name is None:
+        raise InputException('acl_names and mud_name can\'t both by None at the same time')
+    elif acl_names is None:
+        acl_names = make_acl_names(mud_name, ip_version, direction_initiated)
+    if ip_version == [IPVersion.BOTH]:
+        ip_version = [IPVersion.IPV4, IPVersion.IPV6]
+    for i in range(len(acl_names)):
+        for protocol_direction in [Direction.TO_DEVICE, Direction.FROM_DEVICE]:
+            acls.update(
+                make_acl(protocol_direction, ip_version[i], target_url, protocol, match_types, direction_initiated,
+                         local_ports, remote_ports, acl_names[i]))
+    return acls
 
 
 def make_acls(ip_version, target_url, protocol, match_types, direction_initiated, local_ports=None, remote_ports=None,
