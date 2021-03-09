@@ -246,9 +246,12 @@ def make_sub_ace(sub_ace_name, protocol_direction, target_url, protocol, match_t
             destination_port = remote_port
         if protocol is Protocol.TCP:
             match[ip_version] = {'protocol': 6}
-            match['tcp'] = make_port_range(direction_initiated, source_port, destination_port)
+            if source_port is not None or destination_port is not None or direction_initiated is not None:
+                match['tcp'] = make_port_range(direction_initiated, source_port, destination_port)
         elif protocol is Protocol.UDP:
             match[ip_version] = {'protocol': 17}
+            if source_port is not None or destination_port is not None:
+                match['udp'] = make_port_range(dir_init=None, source_port=source_port, destination_port=destination_port)
         else:
             raise InputException(f'protocol is not valid: {protocol}')
         if cloud_ipv4_entry:
@@ -256,6 +259,7 @@ def make_sub_ace(sub_ace_name, protocol_direction, target_url, protocol, match_t
     return {'name': sub_ace_name, 'matches': match, 'actions': {'forwarding': 'accept'}}
 
 
+#@overload
 def make_ace(protocol_direction, target_url, protocol, match_types, direction_initiated, ip_version, local_ports=None,
              remote_ports=None):
     ace = []
@@ -267,7 +271,8 @@ def make_ace(protocol_direction, target_url, protocol, match_types, direction_in
             for r in range(number_remote_ports):
                 ace.append(
                     make_sub_ace(
-                        get_sub_ace_name(get_ace_name(match_type), direction_initiated, i + l + r),
+                        #get_sub_ace_name(get_ace_name(match_type), direction_initiated, i + l + r),
+                        get_sub_ace_name(get_ace_name(match_type), protocol_direction, i + l + r),
                         protocol_direction,
                         target_url,
                         protocol, match_type, direction_initiated, ip_version,
@@ -275,6 +280,27 @@ def make_ace(protocol_direction, target_url, protocol, match_types, direction_in
                         remote_ports[r] if remote_ports is not None else None
                     )
                 )
+    return ace
+
+
+#@make_ace.add
+def make_ace_2(protocol_direction, target_url, protocol, match_type, direction_initiated, ip_version, local_ports=None,
+             remote_ports=None):
+    ace = []
+    number_local_ports = len(local_ports) if type(local_ports) == list else 1
+    number_remote_ports = len(remote_ports) if type(remote_ports) == list else 1
+    for l in range(number_local_ports):
+        for r in range(number_remote_ports):
+            ace.append(
+                make_sub_ace(
+                    get_sub_ace_name(get_ace_name(match_type), protocol_direction, l + r),
+                    protocol_direction,
+                    target_url,
+                    protocol, match_type, direction_initiated, ip_version,
+                    local_ports[l] if local_ports is not None else None,
+                    remote_ports[r] if remote_ports is not None else None
+                )
+            )
     return ace
 
 
@@ -300,6 +326,7 @@ def append_sub_ace(ace, protocol_direction, target_url, protocol, match_type, di
     return ace
 
 
+#@overload
 def make_acl(protocol_direction, ip_version, target_url, protocol, match_types,
              direction_initiated, local_ports=None, remote_ports=None, acl_name=None, mud_name=None):
     acl_type_prefix = get_ipversion_string(ip_version)
@@ -311,6 +338,29 @@ def make_acl(protocol_direction, ip_version, target_url, protocol, match_types,
             'aces': {
                 'ace': make_ace(protocol_direction, target_url, protocol, match_types, direction_initiated, ip_version,
                                 local_ports, remote_ports)}}
+
+
+#@make_acl.add
+def make_acl_2(acl_name, target_url, protocol, match_type, direction_initiated, local_ports=None, remote_ports=None):
+    #(acl_name, protocol_direction, ip_version, target_url, protocol, match_type,
+    #           direction_initiated, local_ports=None, remote_ports=None):
+    if "v4" in acl_name:
+        ip_version = IPVersion.IPV4
+    elif "v6" in acl_name:
+        ip_version = IPVersion.IPV6
+    else:
+        raise InputException("Invalid IPVersion provided")
+    acl_type_prefix = get_ipversion_string(ip_version)
+    if acl_name.endswith("to"):
+        protocol_direction = Direction.TO_DEVICE
+    elif acl_name.endswith("fr"):
+        protocol_direction = Direction.FROM_DEVICE
+    else:
+        raise InputException("Invalid Direction provided")
+    return {'name': acl_name, 'type': acl_type_prefix + '-acl-type',
+            'aces': {
+                'ace': make_ace_2(protocol_direction, target_url, protocol, match_type, direction_initiated,
+                                  ip_version, local_ports, remote_ports)}}
 
 
 # TODO: Finish building this
@@ -330,6 +380,7 @@ def update_acl(acls, ip_version, target_url, protocol, match_types, direction_in
     return acls
 
 
+#@overload
 def make_acls(ip_version, target_url, protocol, match_types, direction_initiated, local_ports=None, remote_ports=None,
               acl_names=None, mud_name=None):
     acls = {}
@@ -347,6 +398,50 @@ def make_acls(ip_version, target_url, protocol, match_types, direction_initiated
     return acls
 
 
+#@make_acls.add
+def make_acls_2(acl_names, #ip_version,
+                target_url, protocol, match_type, direction_initiated, local_ports=None, remote_ports=None):
+    #acls = {}
+    # if ip_version == IPVersion.BOTH:
+    #     ip_version_infix = ["v4", "v6"]
+    # elif ip_version == IPVersion.IPV4:
+    #     ip_version_infix = [(ip_version, "v4")]
+    # elif ip_version == IPVersion.IPV6:
+    #     ip_version_infix = [(ip_version, "v6")]
+    # else:
+    #     raise InputException('invalid ip_version: must be BOTH, IPV4, or IPV6')
+
+    #ip_version_infix = set()
+    #for name in acl_names:
+    #    if "v4" in name:
+    #        ip_version_infix.add("v4")
+    #    if "v6" in name:
+    #        ip_version_infix.add("v6")
+    acls = []
+    for acl_name in acl_names:
+        #acls.update(
+        #    make_acl_2(acl_name, target_url, protocol, match_type, direction_initiated, local_ports, remote_ports)
+        #)
+        acls.append(make_acl_2(acl_name, target_url, protocol, match_type, direction_initiated, local_ports,
+                               remote_ports))
+    return acls
+    #for infix in ip_version_infix:
+    #     for protocol_direction in [Direction.TO_DEVICE, Direction.FROM_DEVICE]:
+    #         for acl_name in acl_names:
+    #             if acl_name.endswith(infix + get_protocol_direction_suffix_string(protocol_direction)):
+    #                 acls.update(
+    #                     make_acl_2(acl_name, protocol_direction, ip_versionfix, target_url, protocol, match_type,
+    #                                direction_initiated, local_ports, remote_ports)
+    #                     )
+    # return acls
+    # #for i in range(len(acl_names)):
+    #    for protocol_direction in [Direction.TO_DEVICE, Direction.FROM_DEVICE]:
+    #        acls.update(
+    #            make_acl(protocol_direction, ip_version[i], target_url, protocol, match_types, direction_initiated,
+    #                     local_ports, remote_ports, acl_names[i]))
+    #return acls
+
+
 def make_acl_name(mud_name, ip_version, direction_initiated):
     acl_name_suffix_ip_version = get_ipversion_suffix_string(ip_version)
     acl_name_suffix_protocol_direction = get_protocol_direction_suffix_string(direction_initiated)
@@ -354,6 +449,7 @@ def make_acl_name(mud_name, ip_version, direction_initiated):
     return f"{mud_name}{acl_name_suffix_ip_version}{acl_name_suffix_protocol_direction}"
 
 
+@overload
 def make_acl_names(mud_name, ip_version, direction_initiated):
     acl_names = []
     if ip_version is IPVersion.BOTH:
@@ -364,12 +460,33 @@ def make_acl_names(mud_name, ip_version, direction_initiated):
     return acl_names
 
 
+@make_acl_names.add
+def make_acl_names_2(mud_name, ip_version):
+    acl_names = []
+    if ip_version is IPVersion.BOTH:
+        for ipv in [IPVersion.IPV4, IPVersion.IPV6]:
+            for protocol_direction in [Direction.TO_DEVICE, Direction.FROM_DEVICE]:
+                acl_names.append(make_acl_name(mud_name, ipv, protocol_direction))
+    else:
+        for protocol_direction in [Direction.TO_DEVICE, Direction.FROM_DEVICE]:
+            acl_names.append(make_acl_name(mud_name, ip_version, protocol_direction))
+    return acl_names
+
+@overload
 def make_policy(direction_initiated, acl_names):
     policy_type_prefix = get_policy_type_prefix_string(direction_initiated)
     access_list = [{'name': name} for name in acl_names]
     return {
         f"{policy_type_prefix}-device-policy": {'access-lists': {'access-list': access_list}}
     }
+
+
+@make_policy.add
+def make_policy_2(acl_names):
+    acl = {}
+    for (protocol_direction, suffix) in [(Direction.FROM_DEVICE, 'fr'), (Direction.TO_DEVICE, 'to')]:
+        acl.update(make_policy(protocol_direction, [name for name in acl_names if name.endswith(suffix)]))
+    return(acl)
 
 
 @overload
