@@ -175,12 +175,11 @@ class MUD():
 
         self.mud_name = f'mud-{random.randint(10000, 99999)}'
         self.acl = []
-        self.acl_v4_to = {}
-        self.acl_v4_from = {}
-        self.acl_v6_to = {}
-        self.acl_v6_from = {}
+        self.acl_v4_to = []
+        self.acl_v4_from = []
+        self.acl_v6_to = []
+        self.acl_v6_from = []
         self.policies = {}
-
         self.rules_local = []
         self.rules_cloud = []
         self.rules_controller = []
@@ -194,15 +193,15 @@ class MUD():
             if "v4" in acl_name:
                 acl_type_prefix = get_ipversion_string(IPVersion.IPV4)
                 if acl_name.endswith('to'):
-                    self.acl_v4_to = {'name': acl_name, 'type': acl_type_prefix + '-acl-type', 'aces': {}}
+                    self.acl_v4_to = {'name': acl_name, 'type': acl_type_prefix + '-acl-type', 'aces': {'ace': []}}
                 elif acl_name.endswith('fr'):
-                    self.acl_v4_from = {'name': acl_name, 'type': acl_type_prefix + '-acl-type', 'aces': {}}
+                    self.acl_v4_from = {'name': acl_name, 'type': acl_type_prefix + '-acl-type', 'aces': {'ace': []}}
             elif "v6" in acl_name:
                 acl_type_prefix = get_ipversion_string(IPVersion.IPV4)
                 if acl_name.endswith('to'):
-                    self.acl_v6_to = {'name': acl_name, 'type': acl_type_prefix + '-acl-type', 'aces': {}}
+                    self.acl_v6_to = {'name': acl_name, 'type': acl_type_prefix + '-acl-type', 'aces': {'ace': []}}
                 elif acl_name.endswith('fr'):
-                    self.acl_v6_from = {'name': acl_name, 'type': acl_type_prefix + '-acl-type', 'aces': {}}
+                    self.acl_v6_from = {'name': acl_name, 'type': acl_type_prefix + '-acl-type', 'aces': {'ace': []}}
 
         self.policies.update(self.make_policy())
 
@@ -635,18 +634,18 @@ class MUD():
 
                         if ipv == IPVersion.IPV4:
                             if protocol_direction == Direction.TO_DEVICE:
-                                self.acl_v4_to['aces']['ace'] = ace
-                                #self.acl.append(self.acl_v4_to)
+                                self.acl_v4_to['aces']['ace'].append(ace)
+                                #self.acl.append(self.acl_v4_to.copy())
                             else:
-                                self.acl_v4_from['aces']['ace'] = ace
-                                #self.acl.append(self.acl_v4_from)
+                                self.acl_v4_from['aces']['ace'].append(ace)
+                                #self.acl.append(self.acl_v4_from.copy())
                         elif ipv == IPVersion.IPV6:
                             if protocol_direction == Direction.TO_DEVICE:
-                                self.acl_v6_to['aces']['ace'] = ace
-                                #self.acl.append(self.acl_v6_to)
+                                self.acl_v6_to['aces']['ace'].append(ace)
+                                #self.acl.append(self.acl_v6_to.copy())
                             else:
-                                self.acl_v6_from['aces']['ace'] = ace
-                                #self.acl.append(self.acl_v6_from)
+                                self.acl_v6_from['aces']['ace'].append(ace)
+                                #self.acl.append(self.acl_v6_from.copy())
 
         mud = self.support_info
         mud.update(self.policies)
@@ -656,18 +655,20 @@ class MUD():
     def print_mud(self):
         print(json.dumps(self.mud_file, indent=4))
 
-# def main():
-#     mf = MUD(mud_version=1, mud_url='https://lighting.example.com/hvac1.json', cache_validity=48,
-#              is_supported=True,
-#              system_info='Test Device', documentation='https://jci.example.com/doc/hvac1',
-#              mfg_name='Test Manufacturer',
-#              ip_version=IPVersion.BOTH)
-#
-#     mf.add_rule(target_url="https://bacnet.honeywell.com", protocol=Protocol.TCP, match_type=MatchType.IS_CLOUD,
-#                 direction_initiated=Direction.TO_DEVICE, local_port=44, remote_port=44)
-#
-#     mf.make_mud()
-#     mf.print_mud()
-#
-# if __name__ == "__main__":
-#     main()
+def main():
+    mf = MUD(mud_version=1, mud_url='https://lighting.example.com/hvac1.json', cache_validity=48,
+             is_supported=True,
+             system_info='Test Device', documentation='https://jci.example.com/doc/hvac1',
+             mfg_name='Test Manufacturer',
+             ip_version=IPVersion.BOTH)
+
+    for (i, match_type) in enumerate([MatchType.IS_CLOUD, MatchType.IS_LOCAL, MatchType.IS_CLOUD]):
+        for (j, init_dir) in enumerate([None, Direction.TO_DEVICE, Direction.FROM_DEVICE]):
+            mf.add_rule(target_url="https://bacnet" + str(i+j) + ".honeywell.com", protocol=Protocol.TCP,
+                        match_type=match_type, direction_initiated=init_dir, local_port=44, remote_port=44)
+
+    mf.make_mud()
+    mf.print_mud()
+
+if __name__ == "__main__":
+    main()
