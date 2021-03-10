@@ -5,11 +5,10 @@ import json
 
 from overload import overload
 
-from .constants import DOMAIN_NAME_REGEX, HTTP_URL_REGEX, URN_URL_REGEX, REGEX_OVERRIDE
-from .exceptions import InputException
-from .models import MatchType, IPVersion, Protocol, Direction
-from .utils import (
-    get_ipversion_string, get_ipversion_suffix_string, get_sub_ace_name,
+from muddy.muddy.constants import DOMAIN_NAME_REGEX, HTTP_URL_REGEX, URN_URL_REGEX, REGEX_OVERRIDE
+from muddy.muddy.exceptions import InputException
+from muddy.muddy.models import MatchType, IPVersion, Protocol, Direction
+from muddy.muddy.utils import (
     get_ipversion_string, get_ipversion_suffix_string, get_sub_ace_name,
     get_ace_name, get_protocol_direction_suffix_string, get_policy_type_prefix_string
 )

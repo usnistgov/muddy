@@ -8,10 +8,10 @@ import re
 
 from overload import overload
 
-from muddy.constants import DOMAIN_NAME_REGEX, HTTP_URL_REGEX, URN_URL_REGEX, REGEX_OVERRIDE
-from muddy.exceptions import InputException
-from muddy.models import MatchType, IPVersion, Protocol, Direction
-from muddy.utils import (
+from muddy.muddy.constants import DOMAIN_NAME_REGEX, HTTP_URL_REGEX, URN_URL_REGEX, REGEX_OVERRIDE
+from muddy.muddy.exceptions import InputException
+from muddy.muddy.models import MatchType, IPVersion, Protocol, Direction
+from muddy.muddy.utils import (
     get_ipversion_string, get_ipversion_suffix_string, get_sub_ace_name,
     get_ace_name, get_protocol_direction_suffix_string, get_policy_type_prefix_string
 )
@@ -386,8 +386,8 @@ class MUD():
                 match[ip_version].update(cloud_ipv4_entry)
         return {'name': sub_ace_name, 'matches': match, 'actions': {'forwarding': 'accept'}}
 
-    def add_rule(self, target_url, protocol, match_type, direction_initiated: Direction = None, local_port = None,
-                 remote_port = None):
+    def add_rule(self, target_url: str, protocol: Protocol, match_type: str, direction_initiated: Direction = None,
+                 local_port: int = None, remote_port: int = None):
         if len(target_url) > 140:
             raise InputException('target url is too long: {}' % target_url)
         match = {}
@@ -655,7 +655,8 @@ class MUD():
     def print_mud(self):
         print(json.dumps(self.mud_file, indent=4))
 
-def main():
+# Unit Testing
+def unit_testing():
     mf = MUD(mud_version=1, mud_url='https://lighting.example.com/hvac1.json', cache_validity=48,
              is_supported=True,
              system_info='Test Device', documentation='https://jci.example.com/doc/hvac1',
@@ -670,5 +671,8 @@ def main():
     mf.make_mud()
     mf.print_mud()
 
+    with open('../test_mud.json', 'w') as fp:
+        json.dump(mf.mud_file, fp, indent=4)
+
 if __name__ == "__main__":
-    main()
+    unit_testing()

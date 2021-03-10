@@ -1,5 +1,5 @@
-from .models import IPVersion, Direction, MatchType, Protocol
-from .exceptions import InputException
+from muddy.muddy.models import IPVersion, Direction, MatchType, Protocol
+from muddy.muddy.exceptions import InputException
 
 
 def get_ipversion_string(ip_version):
