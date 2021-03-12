@@ -8,6 +8,55 @@
 
 There are multiple ways to generate MUD objects, depending on the level of abstraction:
 
+In class form, one would use as follows:
+
+```python
+from muddy.muddy.mud import MUD
+from muddy.muddy.models import Direction, IPVersion, Protocol, MatchType
+
+mud = MUD(mud_version=1, mud_url='https://lighting.example.com/hvac1.json', cache_validity=48, is_supported=True,
+          system_info='The BMS Example Light Bulb', 
+          documentation='https://lighting.example.com/lightbulb2000/documentation',
+          mfg_name='Example Manufacturer', ip_version=IPVersion.BOTH)
+
+mud.add_rule(target_url="https://bacnet.honeywell.com", protocol=Protocol.TCP, match_type=MatchType.IS_CLOUD,
+             direction_initiated=Direction.TO_DEVICE, local_port=44, remote_port=44)
+
+mud.make_mud()
+mud.print_mud()
+```
+
+or
+
+```python
+from muddy.muddy.mud import MUD
+from muddy.muddy.models import Direction, IPVersion, Protocol, MatchType
+
+mud = MUD(mud_version=1, mud_url='https://lighting.example.com/hvac1.json', cache_validity=48, is_supported=True,
+          system_info='The BMS Example Light Bulb', 
+          documentation='https://lighting.example.com/lightbulb2000/documentation',
+          mfg_name='Example Manufacturer', ip_version=IPVersion.BOTH)
+
+rule_list = []
+
+...
+# Data stored in data_dict: type(data_dict) == dict
+rule_list.append(data_dict.copy())
+...
+
+for rule in rule_list:
+    mud.add_rule(target_url=rule['target_url'], protocol=rule['protocol'],
+                 match_type=rule['match_type'], direction_initiated=rule['direction_initiated'],
+                 local_port=rule['local_port'], remote_port=rule['remote_port'])
+
+mud.make_mud()
+mud.print_mud()
+```
+
+To obtain JSON for a MUD object, you may just use `json.dumps(mud.mudfile)`.
+
+Previously developed methods are still supported and are shown below:
+
 ```python
 from muddy.muddy.maker import make_mud
 from muddy.muddy.models import Direction, IPVersion, Protocol, MatchType
@@ -73,7 +122,7 @@ for direction_initiated in [Direction.TO_DEVICE,Direction.FROM_DEVICE]:
 mud = make_mud(support_info, policies, acl)
 ```
 
-To obtain JSON for a MUD object, you may just `json.dumps(mud)`.
+To obtain JSON for a MUD object, you may just use `json.dumps(mud)`.
 
 ## Example output
 
