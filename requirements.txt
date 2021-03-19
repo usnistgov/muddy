@@ -1,0 +1,3 @@
+setuptools~=49.2.1
+Click>=7,<8
+overload>=1.1
