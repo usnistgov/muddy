@@ -4,6 +4,12 @@
 
 **muddy** is a python package and CLI tool for generating MUD files ([RFC8520](https://tools.ietf.org/html/rfc8520)).
 
+## Installation
+
+Navigate into the root directory where the repository was cloned and run the following commands in the terminal:
+1. `pip3 install -r requirement.txt`
+2. `python3 setup.py`
+
 ## Usage
 
 There are multiple ways to generate MUD objects, depending on the level of abstraction:
