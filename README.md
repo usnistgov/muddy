@@ -2,6 +2,8 @@
 
 [![PyPI version](https://badge.fury.io/py/muddy.svg)](https://badge.fury.io/py/muddy)
 
+Forked from https://github.com/lstn/muddy
+
 **muddy** is a python package and CLI tool for generating MUD files ([RFC8520](https://tools.ietf.org/html/rfc8520)).
 
 ## Installation
